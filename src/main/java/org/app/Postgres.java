@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import org.app.entity.User;
 
 /**
- * Класс, предоставляющий методы для работы с БД Postgres. Методы: insert, exists, getUserPassword, initializeDB.
+ * Класс, предоставляющий методы для работы с БД Postgres. Методы: insert, exists, getUserPassword,
+ * initializeDB.
  *
  * @author Samyrai47
  */

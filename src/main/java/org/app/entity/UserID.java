@@ -1,4 +1,4 @@
-package org.app;
+package org.app.entity;
 
 /**
  * Обертка над примитивом long. Используется как ID для пользователя.

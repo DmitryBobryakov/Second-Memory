@@ -1,4 +1,4 @@
-package org.app;
+package org.app.service;
 
 import org.app.entity.User;
 import org.app.exception.*;

@@ -1,7 +1,7 @@
 package org.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.app.UserService;
+import org.app.service.UserService;
 import org.app.controller.request.AuthenticationRequest;
 import org.app.controller.request.RegistrationRequest;
 import org.app.controller.response.AuthenticationResponse;
