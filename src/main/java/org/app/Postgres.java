@@ -13,9 +13,9 @@ import org.app.entity.User;
  * @author Samyrai47
  */
 public class Postgres {
-  private static String jdbcUrl = "jdbc:postgresql://localhost:5432/postgres";
-  private static String username = "postgres";
-  private static String password = "738212";
+  private static final String jdbcUrl = "jdbc:postgresql://localhost:5432/postgres";
+  private static final String username = "postgres";
+  private static final String password = "738212";
 
   /**
    * Добавляет запись в БД.
@@ -29,9 +29,9 @@ public class Postgres {
 
     String sqlRequest = "INSERT INTO users(email, passwd, username) " + "VALUES (?, ?, ?)";
     PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    preparedStatement.setString(1, user.getEmail());
-    preparedStatement.setString(2, user.getPassword());
-    preparedStatement.setString(3, user.getUsername());
+    preparedStatement.setString(1, user.email());
+    preparedStatement.setString(2, user.password());
+    preparedStatement.setString(3, user.username());
 
     preparedStatement.executeUpdate();
 

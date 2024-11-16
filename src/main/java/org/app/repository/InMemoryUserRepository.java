@@ -49,7 +49,7 @@ public class InMemoryUserRepository implements UserRepository {
   @Override
   public void registerUser(User user) {
     try {
-      if (Postgres.exists(user.getEmail())) {
+      if (Postgres.exists(user.email())) {
         throw new UserAlreadyExistsException("User is already exists");
       }
       Postgres.insert(user);
