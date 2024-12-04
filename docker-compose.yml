@@ -13,20 +13,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  pgadmin4:
-    image: elestio/pgadmin:REL-8_11
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: sivolobov.ilya@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: 226372
-      PGADMIN_LISTEN_PORT: 8080
-      PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT: 'False'
-      PGADMIN_CONFIG_WTF_CSRF_ENABLED: 'False'
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./servers.json:/pgadmin4/servers.json
-
   minio:
     container_name: minio
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z-cpuv1
