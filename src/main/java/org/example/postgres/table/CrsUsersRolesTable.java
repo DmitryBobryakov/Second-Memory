@@ -12,30 +12,28 @@ public class CrsUsersRolesTable {
   private static final String password = Config.password;
 
   public static void initialize() throws SQLException {
-    Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
 
     String sqlRequest =
-        "DROP TABLE IF EXISTS crs.users_roles; "
-            + "CREATE TABLE crs.users_roles (user_ID INT, role_ID INT, PRIMARY KEY(user_ID, role_ID),"
-            + "FOREIGN KEY(user_ID) REFERENCES users(user_ID), FOREIGN KEY(role_ID) REFERENCES dct.roles(role_ID));";
-    PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    preparedStatement.execute();
-
-    preparedStatement.close();
-    connection.close();
+        """
+        IF NOT EXISTS crs.users_roles
+        THEN
+            CREATE TABLE crs.users_roles (user_ID INT, role_ID INT, PRIMARY KEY(user_ID, role_ID), FOREIGN KEY(user_ID) REFERENCES users(user_ID), FOREIGN KEY(role_ID) REFERENCES dct.roles(role_ID));
+        """;
+    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+      preparedStatement.execute();
+    }
   }
 
   public static void insert(int userID, int roleID) throws SQLException {
-    Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
 
-    String sqlRequest = "INSERT INTO crs.users_roles(user_ID, role_ID) " + "VALUES (?, ?)";
-    PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    preparedStatement.setInt(1, userID);
-    preparedStatement.setInt(2, roleID);
+    String sqlRequest = "INSERT INTO crs.users_roles(user_ID, role_ID) VALUES (?, ?)";
 
-    preparedStatement.executeUpdate();
-
-    preparedStatement.close();
-    connection.close();
+    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+      preparedStatement.setInt(1, userID);
+      preparedStatement.setInt(2, roleID);
+      preparedStatement.executeUpdate();
+    }
   }
 }
