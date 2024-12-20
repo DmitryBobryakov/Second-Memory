@@ -3,8 +3,8 @@ package org.app.exception;
 import lombok.experimental.StandardException;
 
 @StandardException
-public class NoSuchFileException extends Exception {
-  public NoSuchFileException(String message) {
+public class DbSelectException extends Exception {
+  public DbSelectException(String message) {
     super(message);
   }
 }
