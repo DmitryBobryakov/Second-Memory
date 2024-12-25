@@ -14,7 +14,7 @@ public class FilesRepository {
 
   public List<String> getFileInfo(String id) throws DbSelectException {
     List<String> result = new ArrayList<>();
-    try (ResultSet resultSet = Postgres.select(id);) {
+    try (ResultSet resultSet = Postgres.selectAllFromFileInfo(id);) {
 
       if (resultSet.next()) {
 
