@@ -1,0 +1,4 @@
+app:
+  s3-client:
+    access-key: ''
+    secret-key: ''
