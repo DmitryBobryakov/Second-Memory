@@ -1,28 +1,20 @@
 package org.example;
 
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.deadline.model.AwsCredentials;
-import software.amazon.awssdk.services.s3.S3Client;
+import io.minio.MinioClient;
 
 public class MyS3Client {
-    private final static S3Client client;
+    private static final MinioClient client;
 
     static {
-        String regionName = ConfigUtils.getConfig().getString("app.cs3-client.region-name");
-        String accessKey =  ConfigUtils.getConfig().getString("app.cs3-client.access-key");
-        String secretKey =  ConfigUtils.getConfig().getString("app.cs3-client.region-name");
-
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-        client = S3Client
-                                .builder()
-                                .region(Region.of(regionName))
-                                .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                                .build();
+        String accessKey = "minioadmin";
+        String secretKey = "minioadmin";
+        client =
+                MinioClient.builder()
+                        .endpoint("https://play.min.io")
+                        .credentials(accessKey, secretKey)
+                        .build();
     }
-
-    public static S3Client getClient() {
+    public static MinioClient getClient() {
         return client;
     }
 }
