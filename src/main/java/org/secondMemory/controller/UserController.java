@@ -36,7 +36,7 @@ public class UserController implements Controller {
 
   // Endpoint аутентификации
   private void authenticate() {
-    service.get(
+    service.post(
         "/SecondMemory/signin",
         (Request request, Response response) -> {
           response.type("application/json");
