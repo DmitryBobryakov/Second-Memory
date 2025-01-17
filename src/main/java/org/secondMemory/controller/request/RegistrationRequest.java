@@ -1,4 +1,4 @@
-package org.app.controller.request;
+package org.secondMemory.controller.request;
 
 /**
  * Запрос на регистрацию нового пользователя.
@@ -6,6 +6,5 @@ package org.app.controller.request;
  * @param email почта регистрирующегося пользователя
  * @param password пароль регистрирующегося пользователя
  * @param username имя регистрирующегося пользователя
- * @author Samyrai47
  */
 public record RegistrationRequest(String email, String password, String username) {}

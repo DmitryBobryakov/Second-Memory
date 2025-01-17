@@ -1,9 +1,9 @@
-package org.app.controller.response;
+package org.secondMemory.controller.response;
 
 /**
- * Ответ на запрос о регистрации пользователя.
+ * Ответ на запрос об аутентификации пользователя
  *
  * @param message сообщение от системы. Поставлено для проверки работоспособности, в дальнейшем
  *     следует заменить на нечто более функциональное.
  */
-public record RegistrationResponse(String message) {}
+public record AuthenticationResponse(String message) {}

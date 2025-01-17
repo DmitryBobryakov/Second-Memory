@@ -1,13 +1,10 @@
-package org.app.exception;
+package org.secondMemory.exception;
+
+import lombok.experimental.StandardException;
 
 /**
  * Низкоуровневая ошибка, возникающая если при попытке аутентифицировать пользователя БД выбросила
  * ошибку.
- *
- * @author Samyrai47
  */
-public class DBAuthenticateException extends RuntimeException {
-  public DBAuthenticateException(String message) {
-    super(message);
-  }
-}
+@StandardException
+public class DbAuthenticateException extends RuntimeException {}

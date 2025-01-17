@@ -1,13 +1,9 @@
-package org.app;
+package org.secondMemory;
 
 import java.util.List;
-import org.app.controller.Controller;
+import org.secondMemory.controller.Controller;
 
-/**
- * Инкапсулирует список Controller, у каждого вызывает initializeEndpoints.
- *
- * @author Samyrai47
- */
+/** Инкапсулирует список Controller, у каждого вызывает initializeEndpoints. */
 public class Application {
 
   private final List<Controller> controllers;

@@ -1,13 +1,10 @@
-package org.app.exception;
+package org.secondMemory.exception;
+
+import lombok.experimental.StandardException;
 
 /**
  * Низкоуровневая ошибка, возникающая, если при попытке аутентификации пользователь не был найден в
  * БД.
- *
- * @author Samyrai47
  */
-public class NoSuchUserException extends RuntimeException {
-  public NoSuchUserException(String message) {
-    super(message);
-  }
-}
+@StandardException
+public class NoSuchUserException extends RuntimeException {}

@@ -1,22 +1,23 @@
-package org.app;
+package org.secondMemory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.app.entity.User;
+import java.util.Properties;
+import org.secondMemory.entity.User;
 
 /**
  * Класс, предоставляющий методы для работы с БД Postgres. Методы: insert, exists, getUserPassword,
  * initializeDB.
- *
- * @author Samyrai47
  */
-public class Postgres {
-  private static final String jdbcUrl = "jdbc:postgresql://localhost:5432/postgres";
-  private static final String username = "postgres";
-  private static final String password = "738212";
+public class DbUtils {
+  private static Properties properties;
+
+  public DbUtils(Properties properties) {
+    this.properties = properties;
+  }
 
   /**
    * Добавляет запись в БД.
@@ -26,18 +27,20 @@ public class Postgres {
    *     InMemoryUserRepository.
    */
   public static void insert(User user) throws SQLException {
-    Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
 
-    String sqlRequest = "INSERT INTO users(email, passwd, username) " + "VALUES (?, ?, ?)";
-    PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    preparedStatement.setString(1, user.email());
-    preparedStatement.setString(2, user.password());
-    preparedStatement.setString(3, user.username());
+    String sqlRequest = properties.getProperty("INSERT_USER");
 
-    preparedStatement.executeUpdate();
-
-    preparedStatement.close();
-    connection.close();
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+      preparedStatement.setString(1, user.email());
+      preparedStatement.setString(2, user.password());
+      preparedStatement.setString(3, user.username());
+      preparedStatement.executeUpdate();
+    }
   }
 
   /**
@@ -50,20 +53,24 @@ public class Postgres {
    *     InMemoryUserRepository.
    */
   public static boolean exists(String email) throws SQLException {
-    Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
 
-    String sqlRequest =
-        String.format("SELECT COUNT(email) AS total FROM users WHERE email = '%s'", email);
-    PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    ResultSet rs = preparedStatement.executeQuery();
+    String sqlRequest = properties.getProperty("USER_EXISTS");
 
-    rs.next();
-    int result = rs.getInt("total");
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+      preparedStatement.setString(1, email);
+      ResultSet rs = preparedStatement.executeQuery();
 
-    preparedStatement.close();
-    connection.close();
-
-    return !(result == 0);
+      int result = 0;
+      while (rs.next()) {
+        result = rs.getInt("total");
+      }
+      return result != 0;
+    }
   }
 
   /**
@@ -76,21 +83,24 @@ public class Postgres {
    *     в InMemoryUserRepository.
    */
   public static String getUserPassword(String email) throws SQLException {
-    Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
 
-    String sqlRequest = String.format("SELECT passwd FROM users WHERE email = '%s'", email);
-    PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    ResultSet rs = preparedStatement.executeQuery();
+    String sqlRequest = properties.getProperty("GET_PASSWORD");
 
-    String result = "";
-    while (rs.next()) {
-      result = rs.getString(1);
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+      preparedStatement.setString(1, email);
+      ResultSet rs = preparedStatement.executeQuery();
+
+      String result = "EMPTY PASSWORD";
+      while (rs.next()) {
+        result = rs.getString(1);
+      }
+      return result;
     }
-
-    preparedStatement.close();
-    connection.close();
-
-    return result;
   }
 
   /**
@@ -99,16 +109,15 @@ public class Postgres {
    * @throws SQLException если в процессе создания таблицы в БД что-то пошло не так.
    */
   public static void initializeDB() throws SQLException {
-    Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+    String sqlRequest = properties.getProperty("INITIALIZE_DB");
 
-    String sqlRequest =
-        "DROP TABLE IF EXISTS users; "
-            + "CREATE TABLE users (user_ID INT GENERATED BY DEFAULT AS IDENTITY, email VARCHAR(30), passwd VARCHAR(20), username VARCHAR(30)); "
-            + "ALTER TABLE users ADD CONSTRAINT PK_users PRIMARY KEY (user_ID);";
-    PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest);
-    preparedStatement.execute();
-
-    preparedStatement.close();
-    connection.close();
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+      preparedStatement.execute();
+    }
   }
 }
