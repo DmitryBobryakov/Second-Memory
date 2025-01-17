@@ -10,7 +10,7 @@ public class MyMinIOClient {
     String secretKey = "minioadmin";
     client =
         MinioClient.builder()
-            .endpoint("http://127.0.0.1:9000")
+            .endpoint("http://localhost:9000")
             .credentials(accessKey, secretKey)
             .build();
   }
