@@ -36,18 +36,23 @@ public class FilesRepository {
 
       }
     } catch (SQLException e) {
+      log.error("ERROR: ", e);
       throw new DbSelectException("Cannot select data from DB");
     }
 
     return result;
   }
 
-  public void getFilesInDirectory(String path, String bucket) {
+  public List<List<String>> getFilesInDirectory(String path, String bucket) throws Exception {
     Iterable<Result<Item>> results = Minio.getFilesInDirectory(path, bucket);
     List<List<String>> processedData = new ArrayList<>();
-    results.forEach(itemResult -> {
+    for (Result<Item> result : results) {
+      Item item = result.get();
+      processedData.add(
+          List.of(item.objectName(), item.lastModified().toString(), item.owner().toString(),
+              item.etag()));
+    }
 
-    });
-
+    return processedData;
   }
 }

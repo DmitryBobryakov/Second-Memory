@@ -1,13 +1,13 @@
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Содержимое папки</title>
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css-1.6.0.min.css"/>
 </head>
 <body>
 
-<h1>${model["error"]}</h1>
+<h1>${error}</h1>
 
 </body>
 </html>

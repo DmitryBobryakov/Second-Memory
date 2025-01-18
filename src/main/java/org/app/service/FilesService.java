@@ -22,16 +22,16 @@ public class FilesService {
       return filesRepository.getFileInfo(id);
     } catch (DbSelectException e) {
       log.error("ERROR: ", e);
-      throw new NoSuchFileException("No such file");
+      throw new NoSuchFileException("Файл не найден");
     }
   }
 
-  public void getFilesInDirectory(String path, String bucket) throws NoSuchPathException {
+  public List<List<String>> getFilesInDirectory(String path, String bucket) throws NoSuchPathException {
     try {
-      filesRepository.getFilesInDirectory(path, bucket);
+      return filesRepository.getFilesInDirectory(path, bucket);
     } catch (Exception e) {
       log.error("ERROR: {}", e.getMessage());
-      throw new NoSuchPathException("No such directory");
+      throw new NoSuchPathException("Папка не найдена");
     }
   }
 }

@@ -24,7 +24,8 @@ public class FilesController implements Controller {
   private final ObjectMapper objectMapper;
   private final FreeMarkerEngine freeMarkerEngine;
 
-  public FilesController(Service service, FilesService filesService, ObjectMapper objectMapper, FreeMarkerEngine freeMarkerEngine) {
+  public FilesController(Service service, FilesService filesService, ObjectMapper objectMapper,
+      FreeMarkerEngine freeMarkerEngine) {
     this.filesService = filesService;
     this.service = service;
     this.objectMapper = objectMapper;
@@ -58,11 +59,15 @@ public class FilesController implements Controller {
 
   private void getFilesInDirectory() {
     service.get("/directory/info", (req, res) -> {
-      DirectoryInfoRequest directoryInfoRequest = objectMapper.readValue(req.body(), DirectoryInfoRequest.class);
       try {
-        filesService.getFilesInDirectory(directoryInfoRequest.path(), directoryInfoRequest.bucket());
+        DirectoryInfoRequest directoryInfoRequest = objectMapper.readValue(req.body(),
+            DirectoryInfoRequest.class);
+        List<List<String>> result = filesService.getFilesInDirectory(directoryInfoRequest.path(),
+            directoryInfoRequest.bucket());
+        Map<String, Object> model = new HashMap<>();
+        model.put("directoryInfo", result);
         res.status(200);
-        return "ANSWER";
+        return freeMarkerEngine.render(new ModelAndView(model, "directoryInfo.ftl"));
       } catch (NoSuchPathException e) {
         res.status(404);
         log.error("ERROR: {}", e.getMessage());
