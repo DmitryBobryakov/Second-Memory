@@ -1,9 +1,10 @@
 package org.example;
 
 import io.minio.MinioClient;
+import lombok.Getter;
 
 public class MyMinIOClient {
-  private static final MinioClient client;
+  @Getter private static final MinioClient client;
 
   static {
     String accessKey = "minioadmin";
@@ -13,9 +14,5 @@ public class MyMinIOClient {
             .endpoint("http://localhost:9000")
             .credentials(accessKey, secretKey)
             .build();
-  }
-
-  public static MinioClient getClient() {
-    return client;
   }
 }
