@@ -9,8 +9,12 @@ import java.util.List;
 import org.app.Minio;
 import org.app.Postgres;
 import org.app.exception.DbSelectException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FilesRepository {
+
+  private static final Logger log = LoggerFactory.getLogger(FilesRepository.class);
 
   public List<String> getFileInfo(String id) throws DbSelectException {
     List<String> result = new ArrayList<>();
@@ -40,7 +44,10 @@ public class FilesRepository {
 
   public void getFilesInDirectory(String path, String bucket) {
     Iterable<Result<Item>> results = Minio.getFilesInDirectory(path, bucket);
-    // Обработать ответ, вернуть только нужные поля
+    List<List<String>> processedData = new ArrayList<>();
+    results.forEach(itemResult -> {
+
+    });
 
   }
 }

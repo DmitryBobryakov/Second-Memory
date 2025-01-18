@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import ch.qos.logback.classic.util.ContextInitializer;
+import org.app.template.TemplateFactory;
 import spark.Service;
 
 public class Main {
@@ -21,7 +22,8 @@ public class Main {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Application application = new Application(
-            List.of(new FilesController(service, new FilesService(new FilesRepository()), objectMapper)));
+            List.of(new FilesController(service, new FilesService(new FilesRepository()), objectMapper,
+                TemplateFactory.freeMarkerEngine())));
         Postgres.createTables();
 
         application.start();
