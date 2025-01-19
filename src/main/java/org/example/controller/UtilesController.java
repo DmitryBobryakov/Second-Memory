@@ -78,7 +78,7 @@ public class UtilesController implements Controller {
                             "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
                     String bucketName = request.params("bucketName");
                     Part file = request.raw().getPart("file");
-                    Part newName = request.params("input");
+                    String newName = request.params("name");
                     S3FilesUtils.changeName(bucketName, file.getName(), newName);
                     return "Файл переименовен!";
                 });
@@ -91,8 +91,8 @@ public class UtilesController implements Controller {
                             "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
                     String bucketName = request.params("bucketName");
                     Part file = request.raw().getPart("file");
-                    Part newName = request.params("name");
-                    Part newDir = request.params("direct");
+                    String newName = request.params("name");
+                    String newDir = request.params("direct");
                     S3FilesUtils.copyInOtherPlace(bucketName, file.getName(), newDir, newName);
                     return "Файл перемещен!";
                 });
