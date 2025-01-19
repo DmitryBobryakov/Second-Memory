@@ -1,5 +1,9 @@
 package org.example.service;
 
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import org.example.MyMinIOClient;
 import org.example.Postgres;
 import org.example.exception.NoSuchFileException;
 import org.example.exception.NoSuchPathException;
@@ -7,6 +11,7 @@ import org.example.repository.FilesRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.Part;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +19,7 @@ import java.sql.SQLException;
 public class FilesService {
   private final FilesRepository filesRepository;
   private static final Logger log = LoggerFactory.getLogger(FilesService.class);
+  private static final MinioClient client = MyMinIOClient.getClient();
 
   public FilesService(FilesRepository filesRepository) {
     this.filesRepository = filesRepository;
@@ -37,9 +43,13 @@ public class FilesService {
     }
   }
 
-  public void upload(String bucketName, String filePath) throws NoSuchPathException {
+  public void upload(String bucketName, Part file) throws NoSuchPathException {
     try {
-      filesRepository.upload(bucketName, filePath);
+      boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+      if (!found) {
+        client.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+      }
+      filesRepository.upload(bucketName, file);
     } catch (Exception e) {
       log.error("ERROR: {}", e.getMessage());
       throw new NoSuchPathException("File not found");

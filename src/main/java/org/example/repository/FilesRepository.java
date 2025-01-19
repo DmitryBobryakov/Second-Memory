@@ -1,10 +1,8 @@
 package org.example.repository;
 
-import io.minio.BucketExistsArgs;
 import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import io.minio.UploadObjectArgs;
+import io.minio.PutObjectArgs;
 import io.minio.errors.ErrorResponseException;
 import io.minio.errors.InsufficientDataException;
 import io.minio.errors.InternalException;
@@ -13,8 +11,8 @@ import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
 import io.minio.http.Method;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +23,8 @@ import spark.Spark;
 import org.example.MyMinIOClient;
 import org.example.exception.NoSuchFileException;
 import org.example.exception.NoSuchPathException;
+
+import javax.servlet.http.Part;
 
 public class FilesRepository {
 
@@ -62,33 +62,27 @@ public class FilesRepository {
     }
   }
 
-  public void upload(String bucketName, String filePath)
+  public void upload(String bucketName, Part file)
       throws IOException,
-          ServerException,
           InsufficientDataException,
           ErrorResponseException,
           InvalidKeyException,
           InvalidResponseException,
           XmlParserException,
+          NoSuchAlgorithmException,
           InternalException,
           NoSuchPathException {
 
-    String fileName = Paths.get(filePath).getFileName().toString();
     try {
-      boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-
-      if (!found) {
-        client.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-      }
-
-      client.uploadObject(
-          UploadObjectArgs.builder()
-              .bucket(bucketName)
-              .object(fileName)
-              .filename(filePath)
+      String fileName = file.getSubmittedFileName();
+      InputStream fileInputStream = file.getInputStream();
+      client.putObject(
+          PutObjectArgs.builder().bucket(bucketName).object(fileName).stream(
+                  fileInputStream, -1, 10485760)
               .build());
-    } catch (NoSuchAlgorithmException e) {
-      throw new NoSuchPathException("There is no file in this path");
+
+    } catch (ServerException e) {
+      throw new NoSuchPathException("Файл слишком большого размера");
     }
   }
 }

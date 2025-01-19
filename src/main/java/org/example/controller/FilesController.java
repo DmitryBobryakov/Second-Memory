@@ -1,7 +1,5 @@
 package org.example.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,28 +12,27 @@ import spark.ModelAndView;
 import spark.Service;
 import spark.template.freemarker.FreeMarkerEngine;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
 public class FilesController implements Controller {
   private static final Logger log = LoggerFactory.getLogger(FilesController.class);
   private final FilesService filesService;
   private final Service service;
-  private final ObjectMapper objectMapper;
   private final FreeMarkerEngine freeMarkerEngine;
 
   public FilesController(
-      Service service,
-      FilesService filesService,
-      ObjectMapper objectMapper,
-      FreeMarkerEngine freeMarkerEngine) {
+      Service service, FilesService filesService, FreeMarkerEngine freeMarkerEngine) {
     this.filesService = filesService;
     this.service = service;
-    this.objectMapper = objectMapper;
     this.freeMarkerEngine = freeMarkerEngine;
   }
 
   @Override
   public void initializeEndpoints() {
     download();
-    upload();
+    getUploadPage();
+    postUploadPage();
   }
 
   private void download() {
@@ -52,7 +49,7 @@ public class FilesController implements Controller {
             filesService.download(currentURL, req.params(":fileId"), req.params(":userId"));
             Map<String, Object> model = new HashMap<>();
             res.status(200);
-            return freeMarkerEngine.render(new ModelAndView(model, "fileInfoDownload.ftl"));
+            return freeMarkerEngine.render(new ModelAndView(model, "downloadFile.ftl"));
           } catch (NoSuchFileException e) {
             res.status(404);
             log.error("File doesn't exist with ID: {}", req.params(":fileId"), e);
@@ -63,22 +60,40 @@ public class FilesController implements Controller {
         });
   }
 
-  private void upload() {
+  private void postUploadPage() {
+    service.post(
+        "/files/upload/:bucketName",
+        (req, res) -> {
+          try {
+            req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
+            Part file = req.raw().getPart("file");
+            String bucketName = req.params("bucketName");
+            filesService.upload(bucketName, file);
+            return "Файл загружен!";
+          } catch (NoSuchPathException e) {
+            res.status(404);
+            log.error("File doesn't exist with bucketName: {}", req.params(":bucketName"), e);
+            Map<String, Object> model = new HashMap<>();
+            model.put("error", e.getMessage());
+            return freeMarkerEngine.render(new ModelAndView(model, "noSuchFileError.ftl"));
+          }
+        });
+  }
+
+  private void getUploadPage() {
     service.get(
         "/files/upload/:bucketName",
         (req, res) -> {
           try {
             res.type("text/html; charset=utf-8");
-            filesService.upload("test", "ds");
             Map<String, Object> model = new HashMap<>();
+            model.put("bucketName", req.params(":bucketName"));
             res.status(200);
-            return freeMarkerEngine.render(new ModelAndView(model, "fileUpload.ftl"));
-          } catch (NoSuchPathException e) {
-            res.status(404);
-            log.error("File doesn't exist with ID: {}", req.params(":fileId"), e);
-            Map<String, Object> model = new HashMap<>();
-            model.put("error", e.getMessage());
-            return freeMarkerEngine.render(new ModelAndView(model, "noSuchFileError.ftl"));
+            return freeMarkerEngine.render(new ModelAndView(model, "upload.ftl"));
+          } catch (Exception e) {
+            res.status(500);
+            log.error("The server is down", e);
+            return "error";
           }
         });
   }
