@@ -27,6 +27,7 @@ public class FilesController implements Controller {
   public void initializeEndpoints() {
     getFileInfo();
     getFilesInDirectory();
+    searchFilesInDirectory();
   }
 
   private void getFileInfo() {
@@ -57,4 +58,26 @@ public class FilesController implements Controller {
       }
     });
   }
+
+  private void searchFilesInDirectory() {
+    service.get("/directory/search", (req, res) -> {
+      try {
+        String path = req.queryParams("path");
+        String bucket = req.queryParams("bucket");
+        String query = req.queryParams("query");
+        if (path == null || bucket == null || query == null) {
+          res.status(400);
+          return "Missing required query parameters: path, bucket, or query.";
+        }
+        List<String> matchingFiles = filesService.searchFilesInDirectory(path, bucket, query);
+        res.status(200);
+        return objectMapper.writeValueAsString(matchingFiles);
+      } catch (Exception e) {
+        log.error("Error searching files in directory", e);
+        res.status(500);
+        return "An error occurred while searching for files.";
+      }
+    });
+  }
+
 }
