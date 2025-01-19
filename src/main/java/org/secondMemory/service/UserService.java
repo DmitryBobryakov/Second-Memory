@@ -10,6 +10,7 @@ import org.secondMemory.exception.DbAuthenticateException;
 import org.secondMemory.exception.DbInsertException;
 import org.secondMemory.exception.IllegalPasswordException;
 import org.secondMemory.exception.NoSuchUserException;
+import org.secondMemory.exception.PasswordsDontMatchExcpetion;
 import org.secondMemory.exception.RegistrationException;
 import org.secondMemory.exception.UserAlreadyExistsException;
 import org.secondMemory.repository.UserRepository;
@@ -49,11 +50,14 @@ public class UserService {
    * @param password пароль пользователя.
    * @param username имя пользователя.
    */
-  public void registerUser(String email, String password, String username) {
-    Pattern pattern = Pattern.compile("[@_!#$%^&*()<>?/|}{~:]");
+  public void registerUser(String email, String password, String repeatPassword, String username) {
+    Pattern pattern = Pattern.compile("[@_!#$%^&*()?/|}{~:]");
     Matcher matcher = pattern.matcher(password);
     if (password.length() < 8 || password.toLowerCase().equals(password) || !matcher.find()) {
       throw new IllegalPasswordException("Invalid password");
+    }
+    if (!password.equals(repeatPassword)) {
+      throw new PasswordsDontMatchExcpetion("Passwords don't match.");
     }
     try {
       String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
