@@ -86,4 +86,16 @@ public class Postgres {
             preparedStatement.execute();
         }
     }
+    public static boolean checkAccessRights(String userId, String fileId) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+             PreparedStatement preparedStatement = connection.prepareStatement(checkAccessRights)) {
+
+            preparedStatement.setString(1, userId);
+            preparedStatement.setString(2, fileId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery();) {
+                return resultSet.getBoolean(1);
+            }
+        }
+    }
 }

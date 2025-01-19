@@ -22,7 +22,7 @@ import java.util.List;
 
 public final class S3FilesUtils {
 
-    private static final MinioClient client = MyS3Client.getClient();
+    private static final MinioClient client = Minio.getClient();
 
     public static void changeName(String bucketName, String oldKey, String newKey) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         client.copyObject(

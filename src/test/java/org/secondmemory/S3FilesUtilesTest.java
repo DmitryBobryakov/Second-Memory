@@ -22,7 +22,7 @@ class S3FilesUtilsTest {
     private static final String TEST_BUCKET_2 = "test-bucket-2";
     private static final String TEST_FILE = "test-file.txt";
     private static final String TEST_FILE_CONTENT = "Test file content";
-    private static final MinioClient client = MyS3Client.getClient();
+    private static final MinioClient client = Minio.getClient();
 
     @BeforeEach
     void setUp() throws Exception {

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.Part;
-import org.secondmemory.MyS3Client;
+import org.secondmemory.Minio;
 import org.secondmemory.Postgres;
 import org.secondmemory.exception.DbSelectException;
 import org.secondmemory.exception.NoSuchPathException;
@@ -24,9 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FilesRepository {
-    private static final MinioClient client = MyS3Client.getClient();
+    private static final MinioClient client = Minio.getClient();
     private static final Logger log = LoggerFactory.getLogger(FilesRepository.class);
-
+    public boolean checkAccessRights(String userId, String fileId) throws DbSelectException {
+        try {
+            return Postgres.checkAccessRights(userId, fileId);
+        } catch (SQLException e) {
+            log.error("ERROR: ", e);
+            throw new DbSelectException("Cannot execute SQL query");
+        }
+    }
     public List<String> getFileInfo(String id) throws DbSelectException {
         List<String> result = new ArrayList<>();
         try (ResultSet resultSet = Postgres.selectAllFromFileInfo(id);) {
@@ -55,7 +62,7 @@ public class FilesRepository {
     }
 
     public List<List<String>> getFilesInDirectory(String path, String bucket) throws Exception {
-        Iterable<Result<Item>> results = MyS3Client.getFilesInDirectory(path, bucket);
+        Iterable<Result<Item>> results = Minio.getFilesInDirectory(path, bucket);
         List<List<String>> processedData = new ArrayList<>();
         for (Result<Item> result : results) {
             Item item = result.get();
@@ -89,5 +96,14 @@ public class FilesRepository {
             throw new NoSuchPathException("Файл слишком большого размера");
         }
     }
+    public List<String> getRootDirectories(String bucket) throws Exception {
+        Iterable<Result<Item>> results = Minio.getRootDirectories(bucket);
+        List<String> processedData = new ArrayList<>();
+        for (Result<Item> result : results) {
+            Item item = result.get();
+            processedData.add(item.objectName());
+        }
 
+        return processedData;
+    }
 }

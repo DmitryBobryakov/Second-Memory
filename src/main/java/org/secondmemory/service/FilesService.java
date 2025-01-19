@@ -6,7 +6,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import javax.servlet.http.Part;
-import org.secondmemory.MyS3Client;
+import org.secondmemory.Minio;
 import org.secondmemory.exception.DbSelectException;
 import org.secondmemory.exception.NoSuchFileException;
 import org.secondmemory.exception.NoSuchPathException;
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FilesService {
-    private static final MinioClient client = MyS3Client.getClient();
+    private static final MinioClient client = Minio.getClient();
     private static final Logger log = LoggerFactory.getLogger(FilesService.class);
     private final FilesRepository filesRepository;
 
@@ -50,6 +50,14 @@ public class FilesService {
         } catch (Exception e) {
             log.error("ERROR: {}", e.getMessage());
             throw new NoSuchPathException("File not found");
+        }
+    }
+    public List<String> getRootDirectories(String bucket) throws NoDirectoriesFound {
+        try {
+            return filesRepository.getRootDirectories(bucket);
+        } catch (Exception e) {
+            log.error("ERROR: ", e);
+            throw new NoDirectoriesFound("Папки не найдены");
         }
     }
 

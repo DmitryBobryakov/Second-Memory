@@ -5,7 +5,7 @@ import io.minio.MinioClient;
 import io.minio.Result;
 import io.minio.messages.Item;
 
-public class MyS3Client {
+public class Minio {
     private static final MinioClient client;
 
     static {
@@ -26,6 +26,15 @@ public class MyS3Client {
                         .bucket(bucket)
                         .prefix(path)
                         .build());
+        return results;
+    }
+    public static Iterable<Result<Item>> getRootDirectories(String bucket) {
+        Iterable<Result<Item>> results = client.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucket)
+                        .prefix("/")
+                        .build());
+
         return results;
     }
 }

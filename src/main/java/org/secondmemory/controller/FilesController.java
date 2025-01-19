@@ -8,9 +8,10 @@ import java.util.Map;
 
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
-import org.secondmemory.MyS3Client;
+import org.secondmemory.Minio;
 import org.secondmemory.S3FilesUtils;
 import org.secondmemory.controller.request.DirectoryInfoRequest;
+import org.secondmemory.exception.NoDirectoriesFound;
 import org.secondmemory.exception.NoSuchFileException;
 import org.secondmemory.exception.NoSuchPathException;
 import org.secondmemory.service.FilesService;
@@ -25,16 +26,16 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
 @Slf4j
-public class UtilesController implements Controller {
-    private static final MinioClient client = MyS3Client.getClient();
-    private static final Logger log = LoggerFactory.getLogger(UtilesController.class);
+public class FilesController implements Controller {
+    private static final MinioClient client = Minio.getClient();
+    private static final Logger log = LoggerFactory.getLogger(FilesController.class);
     private final FilesService filesService;
     private final Service service;
     private final ObjectMapper objectMapper;
     private final FreeMarkerEngine freeMarkerEngine;
 
-    public UtilesController(Service service, FilesService filesService, ObjectMapper objectMapper,
-                            FreeMarkerEngine freeMarkerEngine) {
+    public FilesController(Service service, FilesService filesService, ObjectMapper objectMapper,
+                           FreeMarkerEngine freeMarkerEngine) {
         this.filesService = filesService;
         this.service = service;
         this.objectMapper = objectMapper;
@@ -45,6 +46,7 @@ public class UtilesController implements Controller {
     public void initializeEndpoints() {
         getFileInfo();
         getFilesInDirectory();
+        getRootDirectories();
     }
 
     private void getFileInfo() {
@@ -157,6 +159,24 @@ public class UtilesController implements Controller {
                 Map<String, Object> model = new HashMap<>();
                 model.put("error", e.getMessage());
                 return freeMarkerEngine.render(new ModelAndView(model, "noSuchPathError.ftl"));
+            }
+        });
+    }
+    private void getRootDirectories() {
+        service.get("/root/directories/:bucket", (req, res) -> {
+            try {
+                res.type("text/html; charset=utf-8");
+                List<String> result = filesService.getRootDirectories(req.params(":bucket"));
+                Map<String, Object> model = new HashMap<>();
+                model.put("rootDirectories", result);
+                res.status(200);
+                return freeMarkerEngine.render(new ModelAndView(model, "sideMenu.ftl"));
+            } catch (NoDirectoriesFound e) {
+                log.error("ERROR: {}", e.getMessage());
+                Map<String, Object> model = new HashMap<>();
+                model.put("error", e.getMessage());
+                res.status(404);
+                return freeMarkerEngine.render(new ModelAndView(model, "noDirectoriesFound.ftl"));
             }
         });
     }
