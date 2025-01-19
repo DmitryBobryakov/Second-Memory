@@ -6,41 +6,23 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class Postgres {
+  private static Properties properties = null;
 
-  private static final String jdbcUrl = "jdbc:postgresql://localhost:5432/postgres";
-  private static final String username = "postgres";
-  private static final String password = "changeMe";
-
-  private static final String selectFileUUID =
-      "SELECT id FROM file_info WHERE owner=? and name=? and bucket_name=?;";
-  private static final String selectFromFileInfo =
-      "SELECT file_owner, created_date, last_update, tags, access_rights FROM file_info WHERE id = ?;";
-  private static final String selectPathFromFileInfo =
-      "SELECT bucketName, name FROM file_info WHERE id = ?;";
-  private static final String createFileInfoTable =
-      "CREATE TABLE IF NOT EXISTS file_info (id SERIAL PRIMARY KEY, owner varchar(30), name varchar(50), bucket_name varchar(50), created_date varchar(10), last_update varchar(10), tags varchar(100), access_rights varchar(10));";
-  private static final String createUserTable =
-      "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email VARCHAR(30), password VARCHAR(20), username VARCHAR(30));";
-  private static final String createRoleTable =
-      "CREATE TABLE IF NOT EXISTS dct_roles (id SERIAL PRIMARY KEY, name VARCHAR(30));";
-  private static final String createCrsUsersRolesTable =
-      "CREATE TABLE IF NOT EXISTS crs_users_roles (user_id INT, role_ID INT, PRIMARY KEY(user_id, role_ID), FOREIGN KEY(user_id) REFERENCES users(id), FOREIGN KEY(role_id) REFERENCES dct_roles(id));";
-  private static final String createCrsFilesRolesSeeTable =
-      "CREATE TABLE IF NOT EXISTS crs_files_roles_see (file_ID INT, role_ID INT, PRIMARY KEY(file_ID, role_ID), FOREIGN KEY(file_ID) REFERENCES file_info(id), FOREIGN KEY(role_ID) REFERENCES dct_roles(id));";
-  private static final String createCrsFilesRolesChangeTable =
-      "CREATE TABLE IF NOT EXISTS crs_files_roles_change (file_ID INT, role_ID INT, PRIMARY KEY(file_ID, role_ID), FOREIGN KEY(file_ID) REFERENCES file_info(id), FOREIGN KEY(role_ID) REFERENCES dct_roles(id));";
-
-  private static final String insertIntoFileInfoTable =
-      "INSERT INTO file_info (owner, name, bucket_name, created_date, last_update, tags, access_rights) VALUES(?, ?, ?, ?, ?, ?, ?) RETURNING id;"; // RETURNING id нужен ли?
-
-  private static final String canTheUserSeeTheFile =
-      "SELECT EXISTS (SELECT COUNT(id) FROM dct_roles where id in (SELECT role_id FROM crs_users_roles where user_id=?) and id in (SELECT role_id FROM crs_files_roles_see where file_id=?));";
+  public Postgres(Properties properties) {
+    this.properties = properties;
+  }
 
   public static ResultSet selectAllFromFileInfo(String id) throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(selectFromFileInfo)) {
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement =
+            connection.prepareStatement(properties.getProperty("SELECT_FROM_FILE_INFO"))) {
 
       preparedStatement.setString(1, id);
 
@@ -51,23 +33,32 @@ public class Postgres {
   }
 
   public static void createTables() throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
         PreparedStatement preparedStatement =
             connection.prepareStatement(
-                createFileInfoTable
-                    + createUserTable
-                    + createRoleTable
-                    + createCrsUsersRolesTable
-                    + createCrsFilesRolesSeeTable
-                    + createCrsFilesRolesChangeTable)) {
+                properties.getProperty("CREATE_FILE_INFO_TABLE")
+                    + properties.getProperty("CREATE_USER_TABLE")
+                    + properties.getProperty("CREATE_ROLE_TABLE")
+                    + properties.getProperty("CREATE_CRS_USERS_ROLES_TABLE")
+                    + properties.getProperty("CREATE_CRS_FILES_ROLES_SEE_TABLE")
+                    + properties.getProperty("CREATE_CRS_FILES_ROLES_CHANGE_TABLE"))) {
       preparedStatement.execute();
     }
   }
 
   public static void insertIntoFileInfoTable(File file) throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
         PreparedStatement preparedStatement =
-            connection.prepareStatement(insertIntoFileInfoTable)) {
+            connection.prepareStatement(properties.getProperty("INSERT_INTO_FILE_INFO_TABLE"))) {
       preparedStatement.setString(1, file.owner());
       preparedStatement.setString(2, file.name());
       preparedStatement.setString(3, file.bucketName());
@@ -80,49 +71,14 @@ public class Postgres {
     }
   }
 
-  public static int selectFileUUID(File file) throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(selectFileUUID)) {
-      preparedStatement.setString(1, file.owner());
-      preparedStatement.setString(2, file.name());
-      preparedStatement.setString(3, file.bucketName());
-
-      ResultSet rs = preparedStatement.executeQuery();
-
-      Integer result = null;
-      while (rs.next()) {
-        result = rs.getInt(1);
-      }
-      if (result == null) {
-        throw new SQLException("not found FileUUID");
-      }
-      return result;
-    }
-  }
-
-  /*public static int selectRoleUUID(File file) throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(selectFileUUID)) {
-      preparedStatement.setString(1, file.owner());
-      preparedStatement.setString(2, file.name());
-      preparedStatement.setString(3, file.bucketName());
-
-      ResultSet rs = preparedStatement.executeQuery();
-
-      Integer result = null;
-      while (rs.next()) {
-        result = rs.getInt(1);
-      }
-      if (result == null) {
-        throw new SQLException("not found FileUUID");
-      }
-      return result;
-    }
-  }*/
-
   public static ResultSet selectPathToFileFromFileInfo(String fileId) throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(selectPathFromFileInfo)) {
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement =
+            connection.prepareStatement(properties.getProperty("SELECT_PATH_FROM_FILE_INFO"))) {
       preparedStatement.setString(1, fileId);
 
       try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -132,8 +88,13 @@ public class Postgres {
   }
 
   public static ResultSet checkTheUserSeeTheFile(String userId, String fileId) throws SQLException {
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement preparedStatement = connection.prepareStatement(canTheUserSeeTheFile)) {
+    try (Connection connection =
+            DriverManager.getConnection(
+                properties.getProperty("JDBC_URL"),
+                properties.getProperty("DB_USER"),
+                properties.getProperty("DB_PASSWORD"));
+        PreparedStatement preparedStatement =
+            connection.prepareStatement(properties.getProperty("CHECK_THE_USER_CAN_SEE_FILES"))) {
       preparedStatement.setString(1, userId);
       preparedStatement.setString(2, fileId);
 

@@ -7,8 +7,8 @@ public class MyMinIOClient {
   @Getter private static final MinioClient client;
 
   static {
-    String accessKey = "minioadmin";
-    String secretKey = "minioadmin";
+    String accessKey = "minio";
+    String secretKey = "65732168";
     client =
         MinioClient.builder()
             .endpoint("http://localhost:9000")
