@@ -1,7 +1,9 @@
 package org.app.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.app.exception.DbSelectException;
+import org.app.exception.NoDirectoriesFound;
 import org.app.exception.NoSuchFileException;
 import org.app.exception.NoSuchPathException;
 import org.app.repository.FilesRepository;
@@ -17,9 +19,13 @@ public class FilesService {
     this.filesRepository = filesRepository;
   }
 
-  public List<String> getFileInfo(String id) throws NoSuchFileException {
+  public List<String> getFileInfo(String userId, String fileId) throws NoSuchFileException {
     try {
-      return filesRepository.getFileInfo(id);
+      if (filesRepository.checkAccessRights(userId, fileId)) {
+        return filesRepository.getFileInfo(fileId);
+      } else {
+        return new ArrayList<>();
+      }
     } catch (DbSelectException e) {
       log.error("ERROR: ", e);
       throw new NoSuchFileException("Файл не найден");
@@ -32,6 +38,15 @@ public class FilesService {
     } catch (Exception e) {
       log.error("ERROR: {}", e.getMessage());
       throw new NoSuchPathException("Папка не найдена");
+    }
+  }
+
+  public List<String> getRootDirectories(String bucket) throws NoDirectoriesFound {
+    try {
+      return filesRepository.getRootDirectories(bucket);
+    } catch (Exception e) {
+      log.error("ERROR: ", e);
+      throw new NoDirectoriesFound("Папки не найдены");
     }
   }
 }

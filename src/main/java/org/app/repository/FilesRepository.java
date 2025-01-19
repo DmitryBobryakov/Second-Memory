@@ -16,9 +16,18 @@ public class FilesRepository {
 
   private static final Logger log = LoggerFactory.getLogger(FilesRepository.class);
 
+  public boolean checkAccessRights(String userId, String fileId) throws DbSelectException {
+    try {
+      return Postgres.checkAccessRights(userId, fileId);
+    } catch (SQLException e) {
+      log.error("ERROR: ", e);
+      throw new DbSelectException("Cannot execute SQL query");
+    }
+  }
+
   public List<String> getFileInfo(String id) throws DbSelectException {
-    List<String> result = new ArrayList<>();
     try (ResultSet resultSet = Postgres.selectAllFromFileInfo(id);) {
+      List<String> result = new ArrayList<>();
 
       if (resultSet.next()) {
 
@@ -35,12 +44,12 @@ public class FilesRepository {
         result.add(accessRights);
 
       }
+
+      return result;
     } catch (SQLException e) {
       log.error("ERROR: ", e);
       throw new DbSelectException("Cannot select data from DB");
     }
-
-    return result;
   }
 
   public List<List<String>> getFilesInDirectory(String path, String bucket) throws Exception {
@@ -51,6 +60,17 @@ public class FilesRepository {
       processedData.add(
           List.of(item.objectName(), item.lastModified().toString(), item.owner().toString(),
               item.etag()));
+    }
+
+    return processedData;
+  }
+
+  public List<String> getRootDirectories(String bucket) throws Exception {
+    Iterable<Result<Item>> results = Minio.getRootDirectories(bucket);
+    List<String> processedData = new ArrayList<>();
+    for (Result<Item> result : results) {
+      Item item = result.get();
+      processedData.add(item.objectName());
     }
 
     return processedData;

@@ -24,4 +24,14 @@ public class Minio {
 
     return results;
   }
+
+  public static Iterable<Result<Item>> getRootDirectories(String bucket) {
+    Iterable<Result<Item>> results = minioClient.listObjects(
+        ListObjectsArgs.builder()
+            .bucket(bucket)
+            .prefix("/")
+            .build());
+
+    return results;
+  }
 }

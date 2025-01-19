@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.app.controller.request.DirectoryInfoRequest;
+import org.app.exception.NoDirectoriesFound;
 import org.app.exception.NoSuchFileException;
 import org.app.exception.NoSuchPathException;
 import org.app.service.FilesService;
@@ -36,22 +37,29 @@ public class FilesController implements Controller {
   public void initializeEndpoints() {
     getFileInfo();
     getFilesInDirectory();
+    getRootDirectories();
   }
 
   private void getFileInfo() {
-    service.get("/files/info/:id", (req, res) -> {
+    service.get("/files/info/:fileId/:userId", (req, res) -> {
       try {
         res.type("text/html; charset=utf-8");
-        List<String> result = filesService.getFileInfo(req.params(":id"));
+        List<String> result = filesService.getFileInfo(req.params(":userId"), req.params(":fileId"));
         Map<String, Object> model = new HashMap<>();
-        model.put("fileInfo", result);
-        res.status(200);
-        return freeMarkerEngine.render(new ModelAndView(model, "fileInfo.ftl"));
+        if (!result.isEmpty()) {
+          model.put("fileInfo", result);
+          res.status(200);
+          return freeMarkerEngine.render(new ModelAndView(model, "fileInfo.ftl"));
+        } else {
+          model.put("forbidden", "У Вас нет прав доступа для просмотра информации об этом файле");
+          res.status(403);
+          return freeMarkerEngine.render(new ModelAndView(model, "noAccessRights.ftl"));
+        }
       } catch (NoSuchFileException e) {
-        res.status(404);
         log.error("File doesn't exist with ID: {}", req.params(":id"), e);
         Map<String, Object> model = new HashMap<>();
         model.put("error", e.getMessage());
+        res.status(404);
         return freeMarkerEngine.render(new ModelAndView(model, "noSuchFileError.ftl"));
       }
     });
@@ -60,6 +68,7 @@ public class FilesController implements Controller {
   private void getFilesInDirectory() {
     service.get("/directory/info", (req, res) -> {
       try {
+        res.type("text/html; charset=utf-8");
         DirectoryInfoRequest directoryInfoRequest = objectMapper.readValue(req.body(),
             DirectoryInfoRequest.class);
         List<List<String>> result = filesService.getFilesInDirectory(directoryInfoRequest.path(),
@@ -69,11 +78,30 @@ public class FilesController implements Controller {
         res.status(200);
         return freeMarkerEngine.render(new ModelAndView(model, "directoryInfo.ftl"));
       } catch (NoSuchPathException e) {
-        res.status(404);
         log.error("ERROR: {}", e.getMessage());
         Map<String, Object> model = new HashMap<>();
         model.put("error", e.getMessage());
+        res.status(404);
         return freeMarkerEngine.render(new ModelAndView(model, "noSuchPathError.ftl"));
+      }
+    });
+  }
+
+  private void getRootDirectories() {
+    service.get("/root/directories/:bucket", (req, res) -> {
+      try {
+        res.type("text/html; charset=utf-8");
+        List<String> result = filesService.getRootDirectories(req.params(":bucket"));
+        Map<String, Object> model = new HashMap<>();
+        model.put("rootDirectories", result);
+        res.status(200);
+        return freeMarkerEngine.render(new ModelAndView(model, "sideMenu.ftl"));
+      } catch (NoDirectoriesFound e) {
+        log.error("ERROR: {}", e.getMessage());
+        Map<String, Object> model = new HashMap<>();
+        model.put("error", e.getMessage());
+        res.status(404);
+        return freeMarkerEngine.render(new ModelAndView(model, "noDirectoriesFound.ftl"));
       }
     });
   }
