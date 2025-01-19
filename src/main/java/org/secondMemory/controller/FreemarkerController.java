@@ -1,7 +1,5 @@
 package org.secondMemory.controller;
 
-import static spark.Spark.staticFiles;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.secondMemory.service.UserService;
@@ -32,7 +30,6 @@ public class FreemarkerController implements Controller {
   }
 
   private void startApp() {
-    staticFiles.location("/static");
     service.get(
         "/",
         (Request request, Response response) -> {

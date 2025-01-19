@@ -12,6 +12,7 @@ import org.secondMemory.repository.InMemoryUserRepository;
 import org.secondMemory.service.UserService;
 import org.secondMemory.template.TemplateFactory;
 import spark.Service;
+import spark.template.freemarker.FreeMarkerEngine;
 
 public class Main {
   public static void main(String[] args) throws SQLException {
@@ -24,12 +25,12 @@ public class Main {
     Service service = Service.ignite();
     ObjectMapper objectMapper = new ObjectMapper();
     UserService userService = new UserService(new InMemoryUserRepository());
+    FreeMarkerEngine freeMarkerEngine = TemplateFactory.freeMarkerEngine();
     Application application =
         new Application(
             List.of(
-                new UserController(service, userService, objectMapper),
-                new FreemarkerController(
-                    service, userService, TemplateFactory.freeMarkerEngine())));
+                new UserController(service, userService, objectMapper, freeMarkerEngine),
+                new FreemarkerController(service, userService, freeMarkerEngine)));
     DbUtils db = new DbUtils(properties);
     DbUtils.initializeDB();
     application.start();
