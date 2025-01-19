@@ -1,8 +1,8 @@
-package org.example.template;
+package org.secondmemory.template;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
-import org.example.Main;
+import org.secondmemory.Main;
 import spark.template.freemarker.FreeMarkerEngine;
 
 public class TemplateFactory {

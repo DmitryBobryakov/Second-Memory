@@ -1,4 +1,4 @@
-package org.example;
+package org.secondmemory;
 
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;

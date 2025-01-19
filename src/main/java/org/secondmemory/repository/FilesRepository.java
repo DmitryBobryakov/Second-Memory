@@ -1,19 +1,30 @@
-package org.example.repository;
+package org.secondmemory.repository;
 
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.Result;
+import io.minio.errors.*;
 import io.minio.messages.Item;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.example.MyS3Client;
-import org.example.Postgres;
-import org.example.exception.DbSelectException;
+
+import javax.servlet.http.Part;
+import org.secondmemory.MyS3Client;
+import org.secondmemory.Postgres;
+import org.secondmemory.exception.DbSelectException;
+import org.secondmemory.exception.NoSuchPathException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FilesRepository {
-
+    private static final MinioClient client = MyS3Client.getClient();
     private static final Logger log = LoggerFactory.getLogger(FilesRepository.class);
 
     public List<String> getFileInfo(String id) throws DbSelectException {
@@ -55,4 +66,28 @@ public class FilesRepository {
 
         return processedData;
     }
+    public void upload(String bucketName, Part file)
+            throws IOException,
+            InsufficientDataException,
+            ErrorResponseException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            NoSuchAlgorithmException,
+            InternalException,
+            NoSuchPathException {
+
+        try {
+            String fileName = file.getSubmittedFileName();
+            InputStream fileInputStream = file.getInputStream();
+            client.putObject(
+                    PutObjectArgs.builder().bucket(bucketName).object(fileName).stream(
+                                    fileInputStream, -1, 10485760)
+                            .build());
+
+        } catch (ServerException e) {
+            throw new NoSuchPathException("Файл слишком большого размера");
+        }
+    }
+
 }

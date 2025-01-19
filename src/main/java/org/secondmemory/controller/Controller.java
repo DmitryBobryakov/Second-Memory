@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.secondmemory.controller;
 
 public interface Controller {
     void initializeEndpoints();

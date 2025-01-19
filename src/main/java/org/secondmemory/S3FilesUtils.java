@@ -1,4 +1,4 @@
-package org.example;
+package org.secondmemory;
 
 import io.minio.*;
 import io.minio.messages.DeleteError;

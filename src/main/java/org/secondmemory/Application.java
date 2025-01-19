@@ -1,7 +1,7 @@
-package org.example;
+package org.secondmemory;
 
 import java.util.List;
-import org.example.controller.Controller;
+import org.secondmemory.controller.Controller;
 
 public class Application {
 

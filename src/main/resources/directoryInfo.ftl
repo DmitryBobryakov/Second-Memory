@@ -72,6 +72,7 @@
 <main>
     <div style="width: 80%; margin: 0 auto; margin-top: 3rem;">
         <h1 id="welcome">Добрый день, username!</h1>
+        <h3><button type="button" style="color: red" id="назад" onclick="location.href='file:///Users/mihaillepenkin/IdeaProjects/SecondMemori/src/main/resources/upload.ftl'">назад</button></h3>
         <div style="width: 80%; display: flex; justify-content: space-between;">
             <h2>Имя файла:</h2>
             <h2>Дата Обновления:</h2>
@@ -99,7 +100,7 @@
 </main>
 <script>
     function redirectToPage(fileInfo) {
-      window.location.href = 'file:///Users/mihaillepenkin/IdeaProjects/SecondMemori/src/main/resources/PointFilesUtiles.html?file=${fileInfo}';
+      window.location.href = 'file:///Users/mihaillepenkin/IdeaProjects/SecondMemori/src/main/resources/PointFilesUtiles.ftl?file=${fileInfo}';
     }
 </script>
 </body>

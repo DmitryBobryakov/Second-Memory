@@ -1,3 +1,3 @@
-package org.example.controller.request;
+package org.secondmemory.controller.request;
 
 public record DirectoryInfoRequest(String path, String bucket) {}

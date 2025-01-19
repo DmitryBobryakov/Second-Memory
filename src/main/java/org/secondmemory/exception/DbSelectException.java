@@ -1,4 +1,4 @@
-package org.example.exception;
+package org.secondmemory.exception;
 
 import lombok.experimental.StandardException;
 

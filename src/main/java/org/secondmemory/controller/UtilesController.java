@@ -1,23 +1,19 @@
-package org.example.controller;
+package org.secondmemory.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
 import lombok.extern.slf4j.Slf4j;
-import org.example.MyS3Client;
-import org.example.S3FilesUtils;
-import org.example.controller.request.DirectoryInfoRequest;
-import org.example.exception.NoSuchFileException;
-import org.example.exception.NoSuchPathException;
-import org.example.service.FilesService;
+import org.secondmemory.MyS3Client;
+import org.secondmemory.S3FilesUtils;
+import org.secondmemory.controller.request.DirectoryInfoRequest;
+import org.secondmemory.exception.NoSuchFileException;
+import org.secondmemory.exception.NoSuchPathException;
+import org.secondmemory.service.FilesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
@@ -38,7 +34,7 @@ public class UtilesController implements Controller {
     private final FreeMarkerEngine freeMarkerEngine;
 
     public UtilesController(Service service, FilesService filesService, ObjectMapper objectMapper,
-                           FreeMarkerEngine freeMarkerEngine) {
+                            FreeMarkerEngine freeMarkerEngine) {
         this.filesService = filesService;
         this.service = service;
         this.objectMapper = objectMapper;
@@ -69,43 +65,76 @@ public class UtilesController implements Controller {
             }
         });
     }
+    private void postUploadPage() {
+        service.post(
+                "/files/upload/:bucketName",
+                (req, res) -> {
+                    try {
+                        req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
+                        Part file = req.raw().getPart("file");
+                        String bucketName = req.params("bucketName");
+                        filesService.upload(bucketName, file);
+                        return "Файл загружен!";
+                    } catch (NoSuchPathException e) {
+                        res.status(404);
+                        log.error("File doesn't exist with bucketName: {}", req.params(":bucketName"), e);
+                        Map<String, Object> model = new HashMap<>();
+                        model.put("error", e.getMessage());
+                        return freeMarkerEngine.render(new ModelAndView(model, "noSuchFileError.ftl"));
+                    }
+                });
+    }
+
+    private void getUploadPage() {
+        service.get(
+                "/files/upload/:bucketName",
+                (req, res) -> {
+                    try {
+                        res.type("text/html; charset=utf-8");
+                        Map<String, Object> model = new HashMap<>();
+                        model.put("bucketName", req.params(":bucketName"));
+                        res.status(200);
+                        return freeMarkerEngine.render(new ModelAndView(model, "upload.ftl"));
+                    } catch (Exception e) {
+                        res.status(500);
+                        log.error("The server is down", e);
+                        return "error";
+                    }
+                });
+    }
 
     private static void postRename() {
         Spark.post(
-                "/files/rename/:file",
+                "/files/rename/:filename/:bucketName",
                 (request, response) -> {
                     request.attribute(
                             "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
-                    String bucketName = request.params("bucketName");
-                    Part file = request.raw().getPart("file");
-                    String newName = request.params("name");
-                    S3FilesUtils.changeName(bucketName, file.getName(), newName);
+                    Part newName = request.raw().getPart("name");
+                    S3FilesUtils.changeName(request.params(":bucketName"), request.params(":filename"), newName.toString());
                     return "Файл переименовен!";
                 });
     }
+
     private static void postReplace() {
         Spark.post(
-                "/files/replace/:file",
+                "/files/replace/:filename/:bucketName",
                 (request, response) -> {
                     request.attribute(
                             "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
-                    String bucketName = request.params("bucketName");
-                    Part file = request.raw().getPart("file");
-                    String newName = request.params("name");
-                    String newDir = request.params("direct");
-                    S3FilesUtils.copyInOtherPlace(bucketName, file.getName(), newDir, newName);
+                    Part newName = request.raw().getPart("name");
+                    Part newDir = request.raw().getPart("direct");
+                    S3FilesUtils.copyInOtherPlace(request.params(":bucketName"), request.params(":filename"), newDir.toString(), newName.toString());
                     return "Файл перемещен!";
                 });
     }
+
     private static void postDelite() {
         Spark.post(
-                "/files/delite/:file",
+                "/files/delite/:filename/:bucketName",
                 (request, response) -> {
                     request.attribute(
                             "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
-                    String bucketName = request.params("bucketName");
-                    Part file = request.raw().getPart("file");
-                    S3FilesUtils.deleteOne(bucketName, file.getName());
+                    S3FilesUtils.deleteOne(request.params(":bucketName"), request.params(":filename"));
                     return "Файл удален!";
                 });
     }
