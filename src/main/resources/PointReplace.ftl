@@ -10,13 +10,13 @@
        const selectedFile = urlParams.get('file');></const>
 </hr>
 <h3><form action="/files/replace/${file}" method="post" enctype="multipart/form-data">
-    <h3>Имя: <input type="text" id="name"></h3>
-    <h3>Директория: <input type="text" id="direct"></h3>
+    <h3>Имя: <input type="text" name="name"></h3>
+    <h3>Директория: <input type="text" name="direct"></h3>
     <input style="color: red; background: #f2f2f2" type="submit" value="переместить">
     <input style="color: red; background: #f2f2f2" type="reset" value="очистка">
 </form></h3>
 
-<h3><button type="button" style="color: red" id="назад" onclick="location.href='file:///Users/mihaillepenkin/IdeaProjects/SecondMemori/src/main/resources/PointFilesUtiles.ftl'">назад</button></h3>
+<h3><button type="button" style="color: red" id="назад" onclick="location.href='/files/delite/${bucketName}/${filename}'">назад</button></h3>
 
 
 </body>

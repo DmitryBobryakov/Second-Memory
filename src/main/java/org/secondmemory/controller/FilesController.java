@@ -30,9 +30,9 @@ public class FilesController implements Controller {
     private static final MinioClient client = Minio.getClient();
     private static final Logger log = LoggerFactory.getLogger(FilesController.class);
     private final FilesService filesService;
-    private final Service service;
+    private static Service service;
     private final ObjectMapper objectMapper;
-    private final FreeMarkerEngine freeMarkerEngine;
+    private static FreeMarkerEngine freeMarkerEngine;
 
     public FilesController(Service service, FilesService filesService, ObjectMapper objectMapper,
                            FreeMarkerEngine freeMarkerEngine) {
@@ -47,6 +47,14 @@ public class FilesController implements Controller {
         getFileInfo();
         getFilesInDirectory();
         getRootDirectories();
+        postUploadPage();
+        getUploadPage();
+        postRename();
+        postReplace();
+        postDelite();
+        getRename();
+        getReplace();
+        getDelite();
     }
 
     private void getFileInfo() {
@@ -106,38 +114,66 @@ public class FilesController implements Controller {
     }
 
     private static void postRename() {
-        Spark.post(
+        service.post(
                 "/files/rename/:filename/:bucketName",
                 (request, response) -> {
-                    request.attribute(
-                            "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
-                    Part newName = request.raw().getPart("name");
-                    S3FilesUtils.changeName(request.params(":bucketName"), request.params(":filename"), newName.toString());
+                    String newName = request.raw().getParameter("name");
+                    System.out.println(newName);
+                    S3FilesUtils.changeName(request.params(":bucketname"), request.params(":filename"), newName);
                     return "Файл переименовен!";
                 });
     }
 
     private static void postReplace() {
-        Spark.post(
+        service.post(
                 "/files/replace/:filename/:bucketName",
                 (request, response) -> {
-                    request.attribute(
-                            "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
-                    Part newName = request.raw().getPart("name");
-                    Part newDir = request.raw().getPart("direct");
-                    S3FilesUtils.copyInOtherPlace(request.params(":bucketName"), request.params(":filename"), newDir.toString(), newName.toString());
+                    String newName = request.raw().getParameter("name");
+                    String newDir = request.raw().getParameter("direct");
+                    System.out.println(newName);
+                    S3FilesUtils.copyInOtherPlace(request.params(":bucketname"), request.params(":filename"), newDir, newName);
                     return "Файл перемещен!";
                 });
     }
 
     private static void postDelite() {
-        Spark.post(
+        service.post(
                 "/files/delite/:filename/:bucketName",
                 (request, response) -> {
-                    request.attribute(
-                            "org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
                     S3FilesUtils.deleteOne(request.params(":bucketName"), request.params(":filename"));
                     return "Файл удален!";
+                });
+    }
+    private static void getRename() {
+        service.get(
+                "/files/rename/:filename/:bucketName",
+                (request, response) -> {
+                    Map<String, Object> model = new HashMap<>();
+                    model.put("filename", request.params(":filename"));
+                    model.put("bucketName", request.params(":bucketName"));
+                    return freeMarkerEngine.render(new ModelAndView(model, "PointRename.ftl"));
+                });
+    }
+
+    private static void getReplace() {
+        service.get(
+                "/files/replace/:filename/:bucketName",
+                (request, response) -> {
+                    Map<String, Object> model = new HashMap<>();
+                    model.put("filename", request.params(":filename"));
+                    model.put("bucketName", request.params(":bucketName"));
+                    return freeMarkerEngine.render(new ModelAndView(model, "PointReplace.ftl"));
+                });
+    }
+
+    private static void getDelite() {
+        service.get(
+                "/files/delite/:filename/:bucketName",
+                (request, response) -> {
+                    Map<String, Object> model = new HashMap<>();
+                    model.put("filename", request.params(":filename"));
+                    model.put("bucketName", request.params(":bucketName"));
+                    return freeMarkerEngine.render(new ModelAndView(model, "PointFilesUtiles.ftl"));
                 });
     }
 

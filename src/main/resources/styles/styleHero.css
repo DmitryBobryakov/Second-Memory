@@ -1,0 +1,58 @@
+<style type="text/css">
+header {
+    background-color: #FF0032;
+    position: relative;
+    top: -8px;
+    left: -8px;
+    height: 120px;
+    width: 2048px;
+    font-family: Montserrat;
+    .btn {
+        position: absolute;
+        top: 22px;
+        right: 100px;
+        background-color: white;
+        color: #FF0032;
+        border: none;
+        font-size: 40px;
+        cursor: pointer;
+        border-radius: 24px;
+        padding: 15px 40px;
+        font-weight: 20
+    }
+
+    .btn:hover {
+      background-color: #FF0032;
+      color: white;
+      transition-duration: 0.4s;
+    }
+
+    img {
+        position: absolute;
+        top: 15px;
+        left: 100px;
+        border-radius: 24px;
+    }
+
+}
+
+main {
+    font-family: Montserrat;
+    color: #FF0032;
+    position: relative;
+
+    .head {
+        font-size: 60px;
+        position: absolute;
+        left: 100px;
+        top: 100px;
+    }
+
+    .additional {
+        font-size: 30px;
+        position: absolute;
+        top: 300px;
+        right: 100px;
+    }
+}
+</style>

@@ -28,26 +28,28 @@ public final class S3FilesUtils {
         client.copyObject(
                 CopyObjectArgs.builder()
                         .bucket(bucketName)
-                        .object(oldKey)
+                        .object(newKey)
                         .source(
                                 CopySource.builder()
                                         .bucket(bucketName)
-                                        .object(newKey)
+                                        .object(oldKey)
                                         .build())
                         .build());
+        deleteOne(bucketName, oldKey);
     }
 
     public static void copyInOtherPlace(String oldBucketName, String oldKey, String newBucketName, String newKey) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         client.copyObject(
                 CopyObjectArgs.builder()
-                        .bucket(oldBucketName)
-                        .object(oldKey)
+                        .bucket(newBucketName)
+                        .object(newKey)
                         .source(
                                 CopySource.builder()
-                                        .bucket(newBucketName)
-                                        .object(newKey)
+                                        .bucket(oldBucketName)
+                                        .object(oldKey)
                                         .build())
                         .build());
+        deleteOne(oldBucketName, oldKey);
     }
 
     public static void deleteOne(String bucketName, String key) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {

@@ -18,6 +18,7 @@ public class Postgres {
     private static final String jdbcUrl = "jdbc:postgresql://localhost:5435/postgres";
     private static final String username = "postgres";
     private static final String password = "changeme";
+    private static final String checkAccessRights = "SELECT EXISTS (SELECT COUNT(id) FROM dct_roles where id in (SELECT role_id FROM crs_users_roles where user_id=?) and id in (SELECT role_id FROM crs_files_roles_see where file_id=?));";
 
     private static final String selectFromFileInfo = "SELECT file_owner, created_date, last_update, tags, access_rights FROM file_info WHERE id = ?";
     private static final String createFileInfoTable =

@@ -8,6 +8,7 @@ import io.minio.MinioClient;
 import javax.servlet.http.Part;
 import org.secondmemory.Minio;
 import org.secondmemory.exception.DbSelectException;
+import org.secondmemory.exception.NoDirectoriesFound;
 import org.secondmemory.exception.NoSuchFileException;
 import org.secondmemory.exception.NoSuchPathException;
 import org.secondmemory.repository.FilesRepository;

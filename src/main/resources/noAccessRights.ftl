@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Содержимое папки</title>
+  <title>Информация о файле</title>
 </head>
 <body>
 
-    <h1>${error}</h1>
+  <h1>${forbidden}</h1>
 
 </body>
 </html>

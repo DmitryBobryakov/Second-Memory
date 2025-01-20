@@ -9,11 +9,11 @@ public class Minio {
     private static final MinioClient client;
 
     static {
-        String accessKey = "minioadmin";
-        String secretKey = "minioadmin";
+        String accessKey = "miniominio";
+        String secretKey = "miniominio";
         client =
                 MinioClient.builder()
-                        .endpoint("https://play.min.io")
+                        .endpoint("http://localhost:9000")
                         .credentials(accessKey, secretKey)
                         .build();
     }
