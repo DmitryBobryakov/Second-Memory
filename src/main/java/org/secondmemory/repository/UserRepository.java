@@ -19,7 +19,7 @@ public interface UserRepository {
      * @throws NoSuchUserException
      * @throws DbAuthenticateException
      */
-    boolean authenticate(String email, String password);
+    String[] authenticate(String email, String password);
 
     /**
      * Регистрирует нового пользователя. Нет проверки переданных параметров на null - подразумевается,
@@ -31,5 +31,5 @@ public interface UserRepository {
      * @throws UserAlreadyExistsException
      * @throws DbInsertException
      */
-    void registerUser(User user);
+    String registerUser(User user);
 }

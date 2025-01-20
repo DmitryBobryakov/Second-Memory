@@ -21,7 +21,7 @@ public class Postgres {
     private static final String username = "postgres";
     private static final String password = "changeme";
     private static final String checkAccessRights = "SELECT EXISTS (SELECT COUNT(id) FROM dct_roles where id in (SELECT role_id FROM crs_users_roles where user_id=?) and id in (SELECT role_id FROM crs_files_roles_see where file_id=?));";
-
+    private static final String selectId = "SELECT id FROM users WHERE email=?";
     private static final String selectFromFileInfo = "SELECT file_owner, created_date, last_update, tags, access_rights FROM file_info WHERE id = ?";
     private static final String createFileInfoTable =
             "DROP TABLE IF EXISTS file_info; "
@@ -141,7 +141,7 @@ public class Postgres {
             return result != 0;
         }
     }
-    public static void insert(User user) throws SQLException {
+    public static String insert(User user) throws SQLException {
 
         String sqlRequest = properties.getProperty("INSERT_USER");
 
@@ -150,11 +150,29 @@ public class Postgres {
                              properties.getProperty("JDBC_URL"),
                              properties.getProperty("DB_USER"),
                              properties.getProperty("DB_PASSWORD"));
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest); PreparedStatement preparedStatement1 = connection.prepareStatement(selectId)) {
             preparedStatement.setString(1, user.email());
             preparedStatement.setString(2, user.password());
             preparedStatement.setString(3, user.username());
             preparedStatement.executeUpdate();
+            preparedStatement1.setString(1, user.email());
+            ResultSet raw = preparedStatement1.executeQuery();
+            raw.next();
+            return raw.getString(1);
+        }
+    }
+    public static String getUserId(String email) throws SQLException {
+        String sqlRequest = selectId;
+        try (Connection connection =
+                         DriverManager.getConnection(
+                                 properties.getProperty("JDBC_URL"),
+                                 properties.getProperty("DB_USER"),
+                                 properties.getProperty("DB_PASSWORD"));
+                 PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+            preparedStatement.setString(1, email);
+            ResultSet raw = preparedStatement.executeQuery();
+            raw.next();
+            return raw.getString(1);
         }
     }
 }

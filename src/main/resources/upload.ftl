@@ -11,6 +11,6 @@
     <input style="color: red; background: #f2f2f2" type="file" name="file">
     <input style="color: red; background: #f2f2f2" type="submit" value="Загрузить">
 </form>
-<h3><button type="button" style="color: red" id="назад" onclick="location.href='/files/info/${id}/${bucketName}'">назад</button></h3>
+<h3><button type="button" style="color: red" id="назад" onclick="location.href='/files/direct/${bucketName}'">назад</button></h3>
 </body>
 </html>

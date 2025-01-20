@@ -16,25 +16,34 @@ import org.secondmemory.exception.UserAlreadyExistsException;
 public class InMemoryUserRepository implements UserRepository {
 
     @Override
-    public boolean authenticate(String email, String password) {
+    public String[] authenticate(String email, String password) {
         try {
             if (!Postgres.exists(email)) {
                 throw new NoSuchUserException("Cannot find user with email " + email);
             }
             String hashedPassword = Postgres.getUserPassword(email);
-            return BCrypt.checkpw(password, hashedPassword);
+            boolean check = BCrypt.checkpw(password, hashedPassword);
+            String pr1 = "0";
+            if (check) {
+                pr1 = "1";
+            }
+            String[] res = new String[2];
+            res[0] = pr1;
+            res[1] = Postgres.getUserId(email);
+            return res;
         } catch (SQLException e) {
             throw new DbAuthenticateException("Cannot check DB for information");
         }
     }
 
     @Override
-    public void registerUser(User user) {
+    public String registerUser(User user) {
         try {
             if (Postgres.exists(user.email())) {
                 throw new UserAlreadyExistsException("User is already exists");
             }
-            Postgres.insert(user);
+            String check = Postgres.insert(user);
+            return check;
         } catch (SQLException e) {
             throw new DbInsertException("Cannot add User");
         }

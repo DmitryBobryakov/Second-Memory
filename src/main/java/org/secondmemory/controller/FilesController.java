@@ -58,7 +58,7 @@ public class FilesController implements Controller {
     }
 
     private void getFileInfo() {
-        service.get("files/info/:id/:bucketName/", (req, res) -> {
+        service.get("files/info/:id", (req, res) -> {
             try {
                 res.type("text/html; charset=utf-8");
                 List<String> result = filesService.getFileInfo(req.params(":id"));
@@ -77,7 +77,7 @@ public class FilesController implements Controller {
     }
     private void postUploadPage() {
         service.post(
-                "/files/:id/upload/:bucketName",
+                "/files/upload/:bucketName",
                 (req, res) -> {
                     try {
                         req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
@@ -97,7 +97,7 @@ public class FilesController implements Controller {
 
     private void getUploadPage() {
         service.get(
-                "/files/:id/upload/:bucketName",
+                "/files/upload/:bucketName",
                 (req, res) -> {
                     try {
                         res.type("text/html; charset=utf-8");
@@ -115,7 +115,7 @@ public class FilesController implements Controller {
 
     private static void postRename() {
         service.post(
-                "/files/:id/rename/:bucketName/:filename",
+                "/files/rename/:bucketName/:filename",
                 (request, response) -> {
                     String newName = request.raw().getParameter("name");
                     S3FilesUtils.changeName(request.params(":bucketName"), request.params(":filename"), newName);
@@ -125,7 +125,7 @@ public class FilesController implements Controller {
 
     private static void postReplace() {
         service.post(
-                "/files/:id/replace/:filename/:bucketName",
+                "/files/replace/:bucketName/:filename",
                 (request, response) -> {
                     String newName = request.raw().getParameter("name");
                     String newDir = request.raw().getParameter("direct");
@@ -137,7 +137,7 @@ public class FilesController implements Controller {
 
     private static void postDelite() {
         service.post(
-                "/files/:id/delite/:filename/:bucketName",
+                "/files/delite/:bucketName/:filename",
                 (request, response) -> {
                     S3FilesUtils.deleteOne(request.params(":bucketName"), request.params(":filename"));
                     return "Файл удален!";
@@ -145,7 +145,7 @@ public class FilesController implements Controller {
     }
     private static void getRename() {
         service.get(
-                "/files/:id/rename/:filename/:bucketName",
+                "/files/rename/:bucketName/:filename",
                 (request, response) -> {
                     Map<String, Object> model = new HashMap<>();
                     model.put("filename", request.params(":filename"));
@@ -156,7 +156,7 @@ public class FilesController implements Controller {
 
     private static void getReplace() {
         service.get(
-                "/files/:id/replace/:filename/:bucketName",
+                "/files/replace/:bucketName/:filename",
                 (request, response) -> {
                     Map<String, Object> model = new HashMap<>();
                     model.put("filename", request.params(":filename"));
@@ -167,7 +167,7 @@ public class FilesController implements Controller {
 
     private static void getDelite() {
         service.get(
-                "/files/:id/delite/:filename/:bucketName",
+                "/files/delite/:bucketName/:filename",
                 (request, response) -> {
                     Map<String, Object> model = new HashMap<>();
                     model.put("filename", request.params(":filename"));
@@ -178,7 +178,7 @@ public class FilesController implements Controller {
 
 
     private void getFilesInDirectory() {
-        service.get("/directory/info", (req, res) -> {
+        service.get("/files/direct/:bucketName", (req, res) -> {
             try {
                 DirectoryInfoRequest directoryInfoRequest = objectMapper.readValue(req.body(),
                         DirectoryInfoRequest.class);

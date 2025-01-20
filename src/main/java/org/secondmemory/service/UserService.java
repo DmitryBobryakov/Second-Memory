@@ -2,8 +2,11 @@ package org.secondmemory.service;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.minio.MakeBucketArgs;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
+import org.secondmemory.Minio;
 import org.secondmemory.entity.User;
 import org.secondmemory.exception.AuthenticationException;
 import org.secondmemory.exception.DbAuthenticateException;
@@ -29,12 +32,13 @@ public class UserService {
      * @param email почта пользователя.
      * @param password пароль пользователя.
      */
-    public void authenticate(String email, String password) {
+    public String authenticate(String email, String password) {
         try {
-            boolean successAuth = userRepository.authenticate(email, password);
-            if (!successAuth) {
+            String[] successAuth = userRepository.authenticate(email, password);
+            if (successAuth[0].equals("0")) {
                 throw new AuthenticationException("Wrong password for user " + email);
             }
+            return successAuth[1];
         } catch (NoSuchUserException e) {
             throw new AuthenticationException("Cannot find such user");
         } catch (DbAuthenticateException e) {
@@ -50,7 +54,7 @@ public class UserService {
      * @param password пароль пользователя.
      * @param username имя пользователя.
      */
-    public void registerUser(String email, String password, String repeatPassword, String username) {
+    public String registerUser(String email, String password, String repeatPassword, String username) {
         Pattern pattern = Pattern.compile("[@_!#$%^&*()?/|}{~:]");
         Matcher matcher = pattern.matcher(password);
         if (password.length() < 8 || password.toLowerCase().equals(password) || !matcher.find()) {
@@ -62,7 +66,7 @@ public class UserService {
         try {
             String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
             User user = new User(email, hashed, username);
-            userRepository.registerUser(user);
+            return userRepository.registerUser(user);
         } catch (UserAlreadyExistsException e) {
             throw new RegistrationException("User " + username + " already exists");
         } catch (DbInsertException e) {

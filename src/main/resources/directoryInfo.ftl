@@ -91,7 +91,7 @@
                     <h2>${file.get(1)}</h2>
                     <h2>${file.get(2)}</h2>
                     <h2>${file.get(3)}</h2>
-                    <h2><button style="color: red" value="опции" onclick="location.href='/files/delite/${id}/${bucketName}/${file.get(0)}'">опции</button></h2>
+                    <h2><button style="color: red" value="опции" onclick="location.href='/files/delite/${bucketName}/${file.get(0)}'">опции</button></h2>
                 </div>
             </li>
         </#list>

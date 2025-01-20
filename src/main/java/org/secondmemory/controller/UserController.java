@@ -3,7 +3,10 @@ package org.secondmemory.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.minio.MakeBucketArgs;
 import lombok.extern.slf4j.Slf4j;
+import org.secondmemory.Minio;
 import org.secondmemory.controller.response.AuthenticationResponse;
 import org.secondmemory.controller.response.RegistrationResponse;
 import org.secondmemory.exception.AuthenticationException;
@@ -56,11 +59,13 @@ public class UserController implements Controller {
                         map.put(parts[0], parts[1]);
                     }
                     try {
-                        userService.authenticate(map.get("email"), map.get("password"));
+                        String id = userService.authenticate(map.get("email"), map.get("password"));
                         response.status(200);
                         log.info("Successfully logged in with email {}", map.get("email"));
                         Map<String, Object> model = new HashMap<>();
-                        return freeMarkerEngine.render(new ModelAndView(model, "directoryInfo.ftl"));
+                        model.put("id", id);
+                        model.put("bucketName", "firstdir");
+                        return freeMarkerEngine.render(new ModelAndView(model, "upload.ftl"));
                     } catch (AuthenticationException e) {
                         response.status(401);
                         log.error("Failed authentication attempt for {}", map.get("email"), e);
@@ -86,7 +91,7 @@ public class UserController implements Controller {
                         map.put(parts[0], parts[1]);
                     }
                     try {
-                        userService.registerUser(
+                        String check = userService.registerUser(
                                 map.get("email"),
                                 map.get("password"),
                                 map.get("repeatPassword"),
