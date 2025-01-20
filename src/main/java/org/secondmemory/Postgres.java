@@ -99,4 +99,60 @@ public class Postgres {
             }
         }
     }
+    public static String getUserPassword(String email) throws SQLException {
+
+        String sqlRequest = properties.getProperty("GET_PASSWORD");
+
+        try (Connection connection =
+                     DriverManager.getConnection(
+                             properties.getProperty("JDBC_URL"),
+                             properties.getProperty("DB_USER"),
+                             properties.getProperty("DB_PASSWORD"));
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+            preparedStatement.setString(1, email);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            String result = "EMPTY PASSWORD";
+            while (rs.next()) {
+                result = rs.getString(1);
+            }
+            return result;
+        }
+    }
+    public static boolean exists(String email) throws SQLException {
+
+        String sqlRequest = properties.getProperty("USER_EXISTS");
+
+        try (Connection connection =
+                     DriverManager.getConnection(
+                             properties.getProperty("JDBC_URL"),
+                             properties.getProperty("DB_USER"),
+                             properties.getProperty("DB_PASSWORD"));
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+            preparedStatement.setString(1, email);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            int result = 0;
+            while (rs.next()) {
+                result = rs.getInt("total");
+            }
+            return result != 0;
+        }
+    }
+    public static void insert(User user) throws SQLException {
+
+        String sqlRequest = properties.getProperty("INSERT_USER");
+
+        try (Connection connection =
+                     DriverManager.getConnection(
+                             properties.getProperty("JDBC_URL"),
+                             properties.getProperty("DB_USER"),
+                             properties.getProperty("DB_PASSWORD"));
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlRequest)) {
+            preparedStatement.setString(1, user.email());
+            preparedStatement.setString(2, user.password());
+            preparedStatement.setString(3, user.username());
+            preparedStatement.executeUpdate();
+        }
+    }
 }
