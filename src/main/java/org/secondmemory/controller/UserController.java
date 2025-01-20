@@ -59,8 +59,8 @@ public class UserController implements Controller {
                         userService.authenticate(map.get("email"), map.get("password"));
                         response.status(200);
                         log.info("Successfully logged in with email {}", map.get("email"));
-                        return objectMapper.writeValueAsString(
-                                new AuthenticationResponse("You have successfully logged in."));
+                        Map<String, Object> model = new HashMap<>();
+                        return freeMarkerEngine.render(new ModelAndView(model, "directoryInfo.ftl"));
                     } catch (AuthenticationException e) {
                         response.status(401);
                         log.error("Failed authentication attempt for {}", map.get("email"), e);

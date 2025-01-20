@@ -10,7 +10,7 @@ header {
     .btn {
         position: absolute;
         top: 22px;
-        right: 100px;
+        left: 100px;
         background-color: white;
         color: #FF0032;
         border: none;
