@@ -72,7 +72,7 @@
 <main>
     <div style="width: 80%; margin: 0 auto; margin-top: 3rem;">
         <h1 id="welcome">Добрый день, username!</h1>
-        <h3><button type="button" style="color: red" id="скачать" onclick="location.href=''">назад</button></h3>
+        <h3><button type="button" style="color: red" id="скачать" onclick="location.href='/files/upload/${id}/${bucketName}'">назад</button></h3>
         <div style="width: 80%; display: flex; justify-content: space-between;">
             <h2>Имя файла:</h2>
             <h2>Дата Обновления:</h2>
@@ -91,17 +91,12 @@
                     <h2>${file.get(1)}</h2>
                     <h2>${file.get(2)}</h2>
                     <h2>${file.get(3)}</h2>
-                    <h2><button style="color: red" value="опции" onclick="redirectToPage('file')">опции</button></h2>
+                    <h2><button style="color: red" value="опции" onclick="location.href='/files/delite/${id}/${bucketName}/${file.get(0)}'">опции</button></h2>
                 </div>
             </li>
         </#list>
         </ul>
     </div>
 </main>
-<script>
-    function redirectToPage(fileInfo) {
-      window.location.href = '/files/delite/${bucketName}/${filename}';
-    }
-</script>
 </body>
 </html>

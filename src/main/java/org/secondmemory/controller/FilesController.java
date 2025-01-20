@@ -58,7 +58,7 @@ public class FilesController implements Controller {
     }
 
     private void getFileInfo() {
-        service.get("/files/info/:id", (req, res) -> {
+        service.get("files/info/:id/:bucketName/", (req, res) -> {
             try {
                 res.type("text/html; charset=utf-8");
                 List<String> result = filesService.getFileInfo(req.params(":id"));
@@ -77,7 +77,7 @@ public class FilesController implements Controller {
     }
     private void postUploadPage() {
         service.post(
-                "/files/upload/:bucketName",
+                "/files/:id/upload/:bucketName",
                 (req, res) -> {
                     try {
                         req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
@@ -97,7 +97,7 @@ public class FilesController implements Controller {
 
     private void getUploadPage() {
         service.get(
-                "/files/upload/:bucketName",
+                "/files/:id/upload/:bucketName",
                 (req, res) -> {
                     try {
                         res.type("text/html; charset=utf-8");
@@ -115,30 +115,29 @@ public class FilesController implements Controller {
 
     private static void postRename() {
         service.post(
-                "/files/rename/:filename/:bucketName",
+                "/files/:id/rename/:bucketName/:filename",
                 (request, response) -> {
                     String newName = request.raw().getParameter("name");
-                    System.out.println(newName);
-                    S3FilesUtils.changeName(request.params(":bucketname"), request.params(":filename"), newName);
+                    S3FilesUtils.changeName(request.params(":bucketName"), request.params(":filename"), newName);
                     return "Файл переименовен!";
                 });
     }
 
     private static void postReplace() {
         service.post(
-                "/files/replace/:filename/:bucketName",
+                "/files/:id/replace/:filename/:bucketName",
                 (request, response) -> {
                     String newName = request.raw().getParameter("name");
                     String newDir = request.raw().getParameter("direct");
                     System.out.println(newName);
-                    S3FilesUtils.copyInOtherPlace(request.params(":bucketname"), request.params(":filename"), newDir, newName);
+                    S3FilesUtils.copyInOtherPlace(request.params(":bucketName"), request.params(":filename"), newDir, newName);
                     return "Файл перемещен!";
                 });
     }
 
     private static void postDelite() {
         service.post(
-                "/files/delite/:filename/:bucketName",
+                "/files/:id/delite/:filename/:bucketName",
                 (request, response) -> {
                     S3FilesUtils.deleteOne(request.params(":bucketName"), request.params(":filename"));
                     return "Файл удален!";
@@ -146,7 +145,7 @@ public class FilesController implements Controller {
     }
     private static void getRename() {
         service.get(
-                "/files/rename/:filename/:bucketName",
+                "/files/:id/rename/:filename/:bucketName",
                 (request, response) -> {
                     Map<String, Object> model = new HashMap<>();
                     model.put("filename", request.params(":filename"));
@@ -157,7 +156,7 @@ public class FilesController implements Controller {
 
     private static void getReplace() {
         service.get(
-                "/files/replace/:filename/:bucketName",
+                "/files/:id/replace/:filename/:bucketName",
                 (request, response) -> {
                     Map<String, Object> model = new HashMap<>();
                     model.put("filename", request.params(":filename"));
@@ -168,7 +167,7 @@ public class FilesController implements Controller {
 
     private static void getDelite() {
         service.get(
-                "/files/delite/:filename/:bucketName",
+                "/files/:id/delite/:filename/:bucketName",
                 (request, response) -> {
                     Map<String, Object> model = new HashMap<>();
                     model.put("filename", request.params(":filename"));
